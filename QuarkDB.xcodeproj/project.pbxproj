@@ -15,6 +15,7 @@
 		18E9931B225DEEA100DF5F48 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E9931A225DEEA100DF5F48 /* main.m */; };
 		18E99325225DEEA100DF5F48 /* QuarkDBTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E99324225DEEA100DF5F48 /* QuarkDBTests.m */; };
 		18E99330225DEEA100DF5F48 /* QuarkDBUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E9932F225DEEA100DF5F48 /* QuarkDBUITests.m */; };
+		18E99340225DF24100DF5F48 /* QuarkORM.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E9933F225DF24100DF5F48 /* QuarkORM.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +52,8 @@
 		18E9932B225DEEA100DF5F48 /* QuarkDBUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QuarkDBUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		18E9932F225DEEA100DF5F48 /* QuarkDBUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QuarkDBUITests.m; sourceTree = "<group>"; };
 		18E99331225DEEA100DF5F48 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		18E9933E225DF1CC00DF5F48 /* QuarkORM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QuarkORM.h; sourceTree = "<group>"; };
+		18E9933F225DF24100DF5F48 /* QuarkORM.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QuarkORM.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +104,7 @@
 		18E9930A225DEEA000DF5F48 /* QuarkDB */ = {
 			isa = PBXGroup;
 			children = (
+				18E9933D225DF08400DF5F48 /* ORM */,
 				18E9930B225DEEA000DF5F48 /* AppDelegate.h */,
 				18E9930C225DEEA000DF5F48 /* AppDelegate.m */,
 				18E9930E225DEEA000DF5F48 /* ViewController.h */,
@@ -130,6 +134,15 @@
 				18E99331225DEEA100DF5F48 /* Info.plist */,
 			);
 			path = QuarkDBUITests;
+			sourceTree = "<group>";
+		};
+		18E9933D225DF08400DF5F48 /* ORM */ = {
+			isa = PBXGroup;
+			children = (
+				18E9933E225DF1CC00DF5F48 /* QuarkORM.h */,
+				18E9933F225DF24100DF5F48 /* QuarkORM.m */,
+			);
+			path = ORM;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -265,6 +278,7 @@
 				18E99310225DEEA000DF5F48 /* ViewController.m in Sources */,
 				18E9931B225DEEA100DF5F48 /* main.m in Sources */,
 				18E9930D225DEEA000DF5F48 /* AppDelegate.m in Sources */,
+				18E99340225DF24100DF5F48 /* QuarkORM.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
