@@ -7,13 +7,20 @@
 //
 
 #import <XCTest/XCTest.h>
+#import "QuarkORM.h"
+#import "A.h"
 
-@interface QuarkDBTests : XCTestCase
+NS_ASSUME_NONNULL_BEGIN
+
+@interface QuarkORMTests : XCTestCase
 
 @end
 
-@implementation QuarkDBTests
+NS_ASSUME_NONNULL_END
 
+@implementation QuarkORMTests
+
+/*
 - (void)setUp {
     // Put setup code here. This method is called before the invocation of each test method in the class.
 }
@@ -32,6 +39,14 @@
     [self measureBlock:^{
         // Put the code you want to measure the time of here.
     }];
+}
+ */
+
+- (void)testConvertDictionaryToObject {
+    A *a = convertDictionaryToObject(@{
+                                @"a": @[@"a"],
+                                @"b": @1
+                                }, A.class);
 }
 
 @end

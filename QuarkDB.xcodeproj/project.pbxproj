@@ -7,14 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		18D113B422606DFB00E0C3BC /* A.m in Sources */ = {isa = PBXBuildFile; fileRef = 18D113B322606DFB00E0C3BC /* A.m */; };
+		18D113B92260704500E0C3BC /* QuarkORMTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 18D113B82260704500E0C3BC /* QuarkORMTests.m */; };
 		18E9930D225DEEA000DF5F48 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E9930C225DEEA000DF5F48 /* AppDelegate.m */; };
 		18E99310225DEEA000DF5F48 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E9930F225DEEA000DF5F48 /* ViewController.m */; };
 		18E99313225DEEA000DF5F48 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18E99311225DEEA000DF5F48 /* Main.storyboard */; };
 		18E99315225DEEA100DF5F48 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18E99314225DEEA100DF5F48 /* Assets.xcassets */; };
 		18E99318225DEEA100DF5F48 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18E99316225DEEA100DF5F48 /* LaunchScreen.storyboard */; };
 		18E9931B225DEEA100DF5F48 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E9931A225DEEA100DF5F48 /* main.m */; };
-		18E99325225DEEA100DF5F48 /* QuarkDBTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E99324225DEEA100DF5F48 /* QuarkDBTests.m */; };
-		18E99330225DEEA100DF5F48 /* QuarkDBUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E9932F225DEEA100DF5F48 /* QuarkDBUITests.m */; };
 		18E99340225DF24100DF5F48 /* QuarkORM.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E9933F225DF24100DF5F48 /* QuarkORM.m */; };
 /* End PBXBuildFile section */
 
@@ -26,16 +26,12 @@
 			remoteGlobalIDString = 18E99307225DEEA000DF5F48;
 			remoteInfo = QuarkDB;
 		};
-		18E9932C225DEEA100DF5F48 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 18E99300225DEEA000DF5F48 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 18E99307225DEEA000DF5F48;
-			remoteInfo = QuarkDB;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		18D113B222606DFB00E0C3BC /* A.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = A.h; sourceTree = "<group>"; };
+		18D113B322606DFB00E0C3BC /* A.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = A.m; sourceTree = "<group>"; };
+		18D113B82260704500E0C3BC /* QuarkORMTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QuarkORMTests.m; sourceTree = "<group>"; };
 		18E99308225DEEA000DF5F48 /* QuarkDB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QuarkDB.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		18E9930B225DEEA000DF5F48 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		18E9930C225DEEA000DF5F48 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -47,11 +43,7 @@
 		18E99319225DEEA100DF5F48 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		18E9931A225DEEA100DF5F48 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		18E99320225DEEA100DF5F48 /* QuarkDBTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QuarkDBTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		18E99324225DEEA100DF5F48 /* QuarkDBTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QuarkDBTests.m; sourceTree = "<group>"; };
 		18E99326225DEEA100DF5F48 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		18E9932B225DEEA100DF5F48 /* QuarkDBUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QuarkDBUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		18E9932F225DEEA100DF5F48 /* QuarkDBUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QuarkDBUITests.m; sourceTree = "<group>"; };
-		18E99331225DEEA100DF5F48 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		18E9933E225DF1CC00DF5F48 /* QuarkORM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QuarkORM.h; sourceTree = "<group>"; };
 		18E9933F225DF24100DF5F48 /* QuarkORM.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QuarkORM.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -71,13 +63,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		18E99328225DEEA100DF5F48 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -86,7 +71,6 @@
 			children = (
 				18E9930A225DEEA000DF5F48 /* QuarkDB */,
 				18E99323225DEEA100DF5F48 /* QuarkDBTests */,
-				18E9932E225DEEA100DF5F48 /* QuarkDBUITests */,
 				18E99309225DEEA000DF5F48 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -96,7 +80,6 @@
 			children = (
 				18E99308225DEEA000DF5F48 /* QuarkDB.app */,
 				18E99320225DEEA100DF5F48 /* QuarkDBTests.xctest */,
-				18E9932B225DEEA100DF5F48 /* QuarkDBUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -121,19 +104,12 @@
 		18E99323225DEEA100DF5F48 /* QuarkDBTests */ = {
 			isa = PBXGroup;
 			children = (
-				18E99324225DEEA100DF5F48 /* QuarkDBTests.m */,
+				18D113B82260704500E0C3BC /* QuarkORMTests.m */,
 				18E99326225DEEA100DF5F48 /* Info.plist */,
+				18D113B222606DFB00E0C3BC /* A.h */,
+				18D113B322606DFB00E0C3BC /* A.m */,
 			);
 			path = QuarkDBTests;
-			sourceTree = "<group>";
-		};
-		18E9932E225DEEA100DF5F48 /* QuarkDBUITests */ = {
-			isa = PBXGroup;
-			children = (
-				18E9932F225DEEA100DF5F48 /* QuarkDBUITests.m */,
-				18E99331225DEEA100DF5F48 /* Info.plist */,
-			);
-			path = QuarkDBUITests;
 			sourceTree = "<group>";
 		};
 		18E9933D225DF08400DF5F48 /* ORM */ = {
@@ -183,24 +159,6 @@
 			productReference = 18E99320225DEEA100DF5F48 /* QuarkDBTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		18E9932A225DEEA100DF5F48 /* QuarkDBUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 18E9933A225DEEA100DF5F48 /* Build configuration list for PBXNativeTarget "QuarkDBUITests" */;
-			buildPhases = (
-				18E99327225DEEA100DF5F48 /* Sources */,
-				18E99328225DEEA100DF5F48 /* Frameworks */,
-				18E99329225DEEA100DF5F48 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				18E9932D225DEEA100DF5F48 /* PBXTargetDependency */,
-			);
-			name = QuarkDBUITests;
-			productName = QuarkDBUITests;
-			productReference = 18E9932B225DEEA100DF5F48 /* QuarkDBUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -214,10 +172,6 @@
 						CreatedOnToolsVersion = 10.2;
 					};
 					18E9931F225DEEA100DF5F48 = {
-						CreatedOnToolsVersion = 10.2;
-						TestTargetID = 18E99307225DEEA000DF5F48;
-					};
-					18E9932A225DEEA100DF5F48 = {
 						CreatedOnToolsVersion = 10.2;
 						TestTargetID = 18E99307225DEEA000DF5F48;
 					};
@@ -238,7 +192,6 @@
 			targets = (
 				18E99307225DEEA000DF5F48 /* QuarkDB */,
 				18E9931F225DEEA100DF5F48 /* QuarkDBTests */,
-				18E9932A225DEEA100DF5F48 /* QuarkDBUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -255,13 +208,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		18E9931E225DEEA100DF5F48 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		18E99329225DEEA100DF5F48 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -286,15 +232,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				18E99325225DEEA100DF5F48 /* QuarkDBTests.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		18E99327225DEEA100DF5F48 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				18E99330225DEEA100DF5F48 /* QuarkDBUITests.m in Sources */,
+				18D113B422606DFB00E0C3BC /* A.m in Sources */,
+				18D113B92260704500E0C3BC /* QuarkORMTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -305,11 +244,6 @@
 			isa = PBXTargetDependency;
 			target = 18E99307225DEEA000DF5F48 /* QuarkDB */;
 			targetProxy = 18E99321225DEEA100DF5F48 /* PBXContainerItemProxy */;
-		};
-		18E9932D225DEEA100DF5F48 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 18E99307225DEEA000DF5F48 /* QuarkDB */;
-			targetProxy = 18E9932C225DEEA100DF5F48 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -513,40 +447,6 @@
 			};
 			name = Release;
 		};
-		18E9933B225DEEA100DF5F48 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = QuarkDBUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.warmbloom.QuarkDBUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = QuarkDB;
-			};
-			name = Debug;
-		};
-		18E9933C225DEEA100DF5F48 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = QuarkDBUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.warmbloom.QuarkDBUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = QuarkDB;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -573,15 +473,6 @@
 			buildConfigurations = (
 				18E99338225DEEA100DF5F48 /* Debug */,
 				18E99339225DEEA100DF5F48 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		18E9933A225DEEA100DF5F48 /* Build configuration list for PBXNativeTarget "QuarkDBUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				18E9933B225DEEA100DF5F48 /* Debug */,
-				18E9933C225DEEA100DF5F48 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
