@@ -10,6 +10,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-id _Nullable convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class objectClass);
+id _Nullable convertDictionaryToObject(NSDictionary *dictionary, Class objectClass);
+
+NSDictionary<NSString *, id> * _Nullable filterNSStringItem(NSDictionary *dictionary);
 
 NS_ASSUME_NONNULL_END
