@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		18481ABD2261C8D900190C40 /* QuarkORMRegister.m in Sources */ = {isa = PBXBuildFile; fileRef = 18481ABC2261C8D900190C40 /* QuarkORMRegister.m */; };
+		18481AC02261D15C00190C40 /* QuarkORMAttribute.m in Sources */ = {isa = PBXBuildFile; fileRef = 18481ABF2261D15C00190C40 /* QuarkORMAttribute.m */; };
 		18D113B422606DFB00E0C3BC /* A.m in Sources */ = {isa = PBXBuildFile; fileRef = 18D113B322606DFB00E0C3BC /* A.m */; };
 		18D113B92260704500E0C3BC /* QuarkORMTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 18D113B82260704500E0C3BC /* QuarkORMTests.m */; };
 		18E9930D225DEEA000DF5F48 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E9930C225DEEA000DF5F48 /* AppDelegate.m */; };
@@ -29,6 +31,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		18481ABB2261C8D900190C40 /* QuarkORMRegister.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QuarkORMRegister.h; sourceTree = "<group>"; };
+		18481ABC2261C8D900190C40 /* QuarkORMRegister.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QuarkORMRegister.m; sourceTree = "<group>"; };
+		18481ABE2261D15C00190C40 /* QuarkORMAttribute.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QuarkORMAttribute.h; sourceTree = "<group>"; };
+		18481ABF2261D15C00190C40 /* QuarkORMAttribute.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QuarkORMAttribute.m; sourceTree = "<group>"; };
 		18D113B222606DFB00E0C3BC /* A.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = A.h; sourceTree = "<group>"; };
 		18D113B322606DFB00E0C3BC /* A.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = A.m; sourceTree = "<group>"; };
 		18D113B82260704500E0C3BC /* QuarkORMTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QuarkORMTests.m; sourceTree = "<group>"; };
@@ -117,6 +123,10 @@
 			children = (
 				18E9933E225DF1CC00DF5F48 /* QuarkORM.h */,
 				18E9933F225DF24100DF5F48 /* QuarkORM.m */,
+				18481ABB2261C8D900190C40 /* QuarkORMRegister.h */,
+				18481ABC2261C8D900190C40 /* QuarkORMRegister.m */,
+				18481ABE2261D15C00190C40 /* QuarkORMAttribute.h */,
+				18481ABF2261D15C00190C40 /* QuarkORMAttribute.m */,
 			);
 			path = ORM;
 			sourceTree = "<group>";
@@ -221,8 +231,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				18481AC02261D15C00190C40 /* QuarkORMAttribute.m in Sources */,
 				18E99310225DEEA000DF5F48 /* ViewController.m in Sources */,
 				18E9931B225DEEA100DF5F48 /* main.m in Sources */,
+				18481ABD2261C8D900190C40 /* QuarkORMRegister.m in Sources */,
 				18E9930D225DEEA000DF5F48 /* AppDelegate.m in Sources */,
 				18E99340225DF24100DF5F48 /* QuarkORM.m in Sources */,
 			);
@@ -383,7 +395,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = QuarkDB/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -391,6 +405,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.warmbloom.QuarkDB;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -399,7 +414,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = QuarkDB/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -407,6 +424,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.warmbloom.QuarkDB;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
