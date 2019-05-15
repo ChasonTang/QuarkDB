@@ -10,17 +10,96 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 
+
 id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class objectClass) {
     if (dictionary.count == 0) {
         return nil;
     }
     
-    __block id object = nil;
+    unsigned int totalCount = 0;
+    objc_property_t *totalPropertyList = NULL;
+    
+    if ([objectClass conformsToProtocol:@protocol(QuarkORMModel)]) {
+        // 递归查找
+        Class cls = objectClass;
+        for (; cls; cls = class_getSuperclass(cls)) {
+            unsigned int count = 0;
+            objc_property_t *propertyList = class_copyPropertyList(cls, &count);
+            if (!propertyList) {
+                // NULl 指针
+                totalPropertyList = propertyList;
+            } else {
+                totalPropertyList = realloc(totalPropertyList, sizeof(objc_property_t));
+                for (unsigned int i = 0; i < count; ++i) {
+                    totalPropertyList[i + totalCount] = propertyList[i];
+                }
+                free(propertyList);
+            }
+            totalCount += count;
+            
+            unsigned int protocolCount = 0;
+            Protocol * __unsafe_unretained *protocolList = class_copyProtocolList(cls, &protocolCount);
+            BOOL isContainProtocol = NO;
+            for (unsigned int i = 0; i < protocolCount; ++i) {
+                NSString *protocolName = [NSString stringWithCString:protocol_getName(protocolList[i]) encoding:NSUTF8StringEncoding];
+                if ([protocolName isEqualToString:NSStringFromProtocol(@protocol(QuarkORMModel))]) {
+                    isContainProtocol = YES;
+                    break;
+                }
+            }
+            if (isContainProtocol) {
+                break;
+            }
+        }
+    } else {
+        totalPropertyList = class_copyPropertyList(objectClass, &totalCount);
+    }
+    
+    free(totalPropertyList);
     
     [dictionary enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         if (![obj isKindOfClass:NSNumber.class] && ![obj isKindOfClass:NSString.class] && ![obj isKindOfClass:NSArray.class] && ![obj isKindOfClass:NSDictionary.class]) {
             // obj 不是 NSNumber NSString NSArray NSDictionary 类型直接过滤掉
             return;
+        }
+        
+        for (unsigned i = 0; i < totalCount; ++i) {
+            NSString *nameString = [NSString stringWithCString:property_getName(totalPropertyList[i]) encoding:NSUTF8StringEncoding];
+            if ([nameString isEqualToString:key]) {
+                // 匹配到 key
+                const char *attributeCString = property_getAttributes(totalPropertyList[i]);
+                if (attributeCString) {
+                    NSString *attributeString = [NSString stringWithCString:attributeCString encoding:NSUTF8StringEncoding];
+                    NSArray<NSString *> *attributeArray = [attributeString componentsSeparatedByString:@","];
+                    if ([attributeArray containsObject:@"R"]) {
+                        // 只读 property 忽略
+                        break;
+                    }
+                    // 获取 setter
+                    // 如果存在 setter= 的自定义 setter 情况
+                    __block NSString *setterMethodString = nil;
+                    if ([attributeString containsString:@",S"]) {
+                        [attributeArray enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                            if ([obj hasPrefix:@"S"] && obj.length >= 2) {
+                                setterMethodString = [obj substringFromIndex:1];
+                                *stop = YES;
+                            }
+                        }];
+                    } else {
+                        // 标准 setter
+                        if (nameString.length >= 1) {
+                            NSString *firstWord = [nameString substringToIndex:1].uppercaseString;
+                            NSString *otherWord = nil;
+                            if (nameString.length >= 2) {
+                                otherWord = [nameString substringFromIndex:1];
+                            }
+                            setterMethodString = [NSString stringWithFormat:@"set%@%@:", firstWord, otherWord.length > 0 ? otherWord : @""];
+                        }
+                    }
+                }
+                
+                break;
+            }
         }
         objc_property_t property = class_getProperty(objectClass, key.UTF8String);
         // property 存在
@@ -104,6 +183,9 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
             }
         }
     }];
+    
+    // propertyList == NULl, free will no operation
+    free(propertyList);
     
     return object;
 }

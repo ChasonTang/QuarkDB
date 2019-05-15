@@ -10,8 +10,10 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-id _Nullable convertDictionaryToObject(NSDictionary *dictionary, Class objectClass);
+@protocol QuarkORMModel
 
-NSDictionary<NSString *, id> * _Nullable filterNSStringItem(NSDictionary *dictionary);
+@end
+
+id _Nullable convertDictionaryToObject(NSDictionary *dictionary, Class objectClass);
 
 NS_ASSUME_NONNULL_END
