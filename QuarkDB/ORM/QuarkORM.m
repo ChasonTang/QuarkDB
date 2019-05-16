@@ -76,24 +76,8 @@ void fetchAllSettableProperty(Class cls, objc_property_t *destinationPropertyLis
     free(propertyList);
 }
 
-id convertObjectToObject(id jsonObject, Class objectClass) {
-    // NSJSONSerialization 在数字比较大的时候会使用 NSDecimalNumber
-    // NSNull 也是会被转换的，但是转模型不需要转这个类型
-    // NSJSONReadingMutableContainers 导致变为 mutable JSON Array/Dictionary
-    // NSJSONReadingMutableLeaves 导致叶子结点变为 NSMutableString
-    // 这里隐含支持的 JSON 类型有 NSMutableString NSNull NSMutableDictionary NSMutableArray NSDecimalNumber
-    if (![jsonObject isKindOfClass:NSString.class] || ![jsonObject isKindOfClass:NSNumber.class] || ![jsonObject isKindOfClass:NSArray.class] || ![jsonObject isKindOfClass:NSDictionary.class]) {
-        return nil;
-    }
-    id convertedObject = nil;
-    if ((objectClass == NSString.class && [jsonObject isKindOfClass:NSString.class]) || (objectClass == NSNumber.class && [jsonObject isKindOfClass:NSNumber.class])) {
-        return jsonObject;
-    } else if (objectClass == NSArray.class && [jsonObject isKindOfClass:NSArray.class]) {
-        // TODO: 循环赋值
-    } else if ([jsonObject isKindOfClass:NSDictionary.class]){
-        // TODO: 递归赋值
-        NSDictionary *dictionary = jsonObject;
-    } else {
+id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class objectClass) {
+    if (dictionary.count == 0) {
         return nil;
     }
     
@@ -104,6 +88,7 @@ id convertObjectToObject(id jsonObject, Class objectClass) {
         // 递归查找
         Class cls = objectClass;
         for (; cls; cls = class_getSuperclass(cls)) {
+            fetchAllSettableProperty(<#__unsafe_unretained Class  _Nonnull cls#>, <#objc_property_t * _Nullable destinationPropertyList#>, <#unsigned int * _Nullable destinationCount#>)
             fetchAllSettableProperty(cls, totalPropertyList, &totalCount);
             
             BOOL isContainProtocol = NO;
@@ -124,6 +109,8 @@ id convertObjectToObject(id jsonObject, Class objectClass) {
     } else {
         fetchAllSettableProperty(objectClass, totalPropertyList, &totalCount);
     }
+    
+    __block id modelObject = nil;
     
     [dictionary enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         // NSJSONSerialization 在数字比较大的时候会使用 NSDecimalNumber
@@ -184,17 +171,14 @@ id convertObjectToObject(id jsonObject, Class objectClass) {
                     convertedObject = obj;
                 } else if (propertyClass == NSArray.class && protocolClass && [obj isKindOfClass:NSArray.class]) {
                     // 属于数组并且带有类型，则循环转换
-                    NSMutableArray *resultArray = nil;
-                    [obj enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                        id arrayObject = nil;
-                        if ((protocolClass == NSString.class && [obj isKindOfClass:NSString.class]) || (protocolClass == NSNumber.class && [obj isKindOfClass:NSNumber.class])) {
-                            // 直接赋值
-                            arrayObject = obj;
-                        } else if ()
-                    }];
+                    convertedObject = convertArrayToObject(obj, protocolClass);
                 } else if ([obj isKindOfClass:NSDictionary.class]){
                     // 对象类型，转换
                     convertedObject = convertDictionaryToObject(obj, propertyClass);
+                }
+                if (!convertedObject) {
+                    // 如果没有可转换的对象，则跳过
+                    break;
                 }
                 // 获取 setter
                 NSString *setterMethodString = nil;
@@ -217,128 +201,19 @@ id convertObjectToObject(id jsonObject, Class objectClass) {
                     // 正常情况不应该走到这里，属于对 stringWithUTF8String 返回 nil 的兜底处理
                     break;
                 }
-                // TODO: 调用 setter 赋值
-                break;
-            }
-        }
-        
-        for (unsigned i = 0; i < totalCount; ++i) {
-            NSString *nameString = [NSString stringWithCString:property_getName(totalPropertyList[i]) encoding:NSUTF8StringEncoding];
-            if ([nameString isEqualToString:key]) {
-                // 匹配到 key
-                const char *attributeCString = property_getAttributes(totalPropertyList[i]);
-                if (attributeCString) {
-                    NSString *attributeString = [NSString stringWithCString:attributeCString encoding:NSUTF8StringEncoding];
-                    NSArray<NSString *> *attributeArray = [attributeString componentsSeparatedByString:@","];
-                    if ([attributeArray containsObject:@"R"]) {
-                        // 只读 property 忽略
-                        break;
-                    }
-                    // 获取 setter
-                    // 如果存在 setter= 的自定义 setter 情况
-                    __block NSString *setterMethodString = nil;
-                    if ([attributeString containsString:@",S"]) {
-                        [attributeArray enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                            if ([obj hasPrefix:@"S"] && obj.length >= 2) {
-                                setterMethodString = [obj substringFromIndex:1];
-                                *stop = YES;
-                            }
-                        }];
-                    } else {
-                        // 标准 setter
-                        if (nameString.length >= 1) {
-                            NSString *firstWord = [nameString substringToIndex:1].uppercaseString;
-                            NSString *otherWord = nil;
-                            if (nameString.length >= 2) {
-                                otherWord = [nameString substringFromIndex:1];
-                            }
-                            setterMethodString = [NSString stringWithFormat:@"set%@%@:", firstWord, otherWord.length > 0 ? otherWord : @""];
-                        }
-                    }
-                }
-                
-                break;
-            }
-        }
-        objc_property_t property = class_getProperty(objectClass, key.UTF8String);
-        // property 存在
-        if (property) {
-            const char *attributeCString = property_getAttributes(property);
-            if (attributeCString) {
-                
-                NSString *attribute = [NSString stringWithUTF8String:attributeCString];
-                NSArray<NSString *> *attributeArray = [attribute componentsSeparatedByString:@","];
-                
-                if ([attributeArray containsObject:@"R"]) {
-                    // 只读 property 忽略
-                    return;
-                }
-                
-                // 获取 setter
-                // 如果存在 setter= 的自定义 setter 情况
-                __block NSString *setterMethodString = nil;
-                if ([attribute containsString:@",S"]) {
-                    [attributeArray enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                        if ([obj hasPrefix:@"S"] && obj.length >= 2) {
-                            setterMethodString = [obj substringFromIndex:1];
-                            *stop = YES;
-                        }
-                    }];
-                } else {
-                    // 标准 setter
-                    NSString *propertyName = [NSString stringWithUTF8String:property_getName(property)];
-                    if (propertyName.length >= 1) {
-                        NSString *firstWord = [propertyName substringToIndex:1].uppercaseString;
-                        NSString *otherWord = nil;
-                        if (propertyName.length >= 2) {
-                            otherWord = [propertyName substringFromIndex:1];
-                        }
-                        setterMethodString = [NSString stringWithFormat:@"set%@%@:", firstWord, otherWord.length > 0 ? otherWord : @""];
-                    }
-                }
-                
-                if (setterMethodString.length == 0) {
-                    // 没有 setter 方法则忽略
-                    return;
-                }
-                
+                // 调用 setter 赋值
                 SEL setterSelector = NSSelectorFromString(setterMethodString);
-                
-                if (attributeArray.firstObject && attributeArray.firstObject.length > 4) {
-                    // T@"ClassName" 必定大于 4
-                    NSString *className = [attributeArray.firstObject substringWithRange:NSMakeRange(3, attributeArray.firstObject.length - 4)];
-                    Class class = NSClassFromString(className);
-                    
-                    if (![class instancesRespondToSelector:setterSelector]) {
-                        // 没有对应的 setter 响应则忽略
-                        return;
-                    }
-                    
-                    if ([obj isKindOfClass:NSDictionary.class]) {
-                        // 需要递归调用 convertDictionaryToObject
-                        id value = convertDictionaryToObject(filterNSStringItem(obj), class);
-                        if (!object) {
-                            object = [[class alloc] init];
-                        }
-                        ((void (*)(id, SEL, id)) objc_msgSend)(object, setterSelector, value);
-                        
-                        return;
-                    }
-                    
-                    if ([obj isKindOfClass:NSArray.class]) {
-                        // TODO: 数组
-                        return;
-                    }
-                    
-                    if ([obj isKindOfClass:class]) {
-                        // obj 必须是 property 的对象或者子类对象才能赋值
-                        // 上面判断过 NSNumber NSString，因此这里只能是其子类或者基类
-                        ((void (*)(id, SEL, id)) objc_msgSend)(object, setterSelector, obj);
-                    }
-                } else {
-                    // 属性字符串不符合规范，忽略
-                    return;
+                if (![objectClass instancesRespondToSelector:setterSelector]) {
+                    // 没有对应的 setter 响应则忽略，但是一般情况下不会进这个逻辑，因为 readwrite property 肯定有 setter
+                    break;
                 }
+                if (!modelObject) {
+                    // 由于设计构造函数运行时无法获取，因此只能使用 init 构造
+                    modelObject = [[objectClass alloc] init];
+                }
+                ((void (*)(id, SEL, id)) objc_msgSend)(modelObject, setterSelector, convertedObject);
+                
+                break;
             }
         }
     }];
@@ -346,16 +221,34 @@ id convertObjectToObject(id jsonObject, Class objectClass) {
     // totalPropertyList == NULl, free will no operation
     free(totalPropertyList);
     
-    return object;
+    return modelObject;
 }
 
-NSDictionary<NSString *, id> * filterNSStringItem(NSDictionary *dictionary) {
-    NSMutableDictionary<NSString *, id> *mutableCopy = [NSMutableDictionary<NSString *, id> dictionaryWithCapacity:dictionary.count];
-    [dictionary enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-        if ([key isKindOfClass:NSString.class]) {
-            mutableCopy[key] = obj;
+NSArray *convertArrayToObject(NSArray *array, Class arrayItemClass) {
+    if (array.count == 0) {
+        return nil;
+    }
+    // 这里只能支持 NSString NSNumber NSDictionary 转换，不支持 NSArray 嵌套转换，因为丢失了类型信息
+    if (arrayItemClass != NSString.class && arrayItemClass != NSNumber.class && arrayItemClass != NSDictionary.class) {
+        return nil;
+    }
+    __block NSMutableArray *resultMutableArray = nil;
+    [array enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        id item = nil;
+        if ((arrayItemClass == NSString.class && [obj isKindOfClass:NSString.class]) || (arrayItemClass == NSNumber.class && [obj isKindOfClass:NSNumber.class])) {
+            item = obj;
+        } else if (arrayItemClass == NSDictionary.class && [obj isKindOfClass:NSDictionary.class]) {
+            item = convertDictionaryToObject(obj, arrayItemClass);
+        }
+        if (item) {
+            if (!resultMutableArray) {
+                resultMutableArray = [NSMutableArray arrayWithCapacity:array.count];
+            }
+            // 添加对象
+            [resultMutableArray addObject:item];
         }
     }];
     
-    return mutableCopy.count > 0 ? mutableCopy.copy : nil;
+    // iOS 11 之前可能存在性能问题
+    return resultMutableArray.copy;
 }
