@@ -14,6 +14,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-id _Nullable convertDictionaryToObject(NSDictionary *dictionary, Class objectClass);
+id _Nullable convertObjectToObject(id jsonObject, Class objectClass);
 
 NS_ASSUME_NONNULL_END
