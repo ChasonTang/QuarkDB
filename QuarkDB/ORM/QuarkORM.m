@@ -12,15 +12,18 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-void fetchAllSettableProperty(Class cls, objc_property_t *_Nullable destinationPropertyList, unsigned int *_Nullable destinationCount);
+void fetchAllSettableProperty(Class cls, objc_property_t *_Nullable *destinationPropertyList, unsigned int *destinationCount);
 
 NS_ASSUME_NONNULL_END
 
-void fetchAllSettableProperty(Class cls, objc_property_t *destinationPropertyList, unsigned int *destinationCount) {
+void fetchAllSettableProperty(Class cls, objc_property_t **destinationPropertyListPointer, unsigned int *destinationCountPointer) {
+    if (destinationPropertyListPointer == NULL || destinationCountPointer == NULL) {
+        return;
+    }
     // 防御 destinationCount 和 destinationPropertyList 不匹配的情况
-    // 1. (destinationCount == NULl || *destinationCount == 0) && destinationPropertyList != NULL
-    // 2. destinationCount != NULL && *destinationCount != 0 && destinationPropertyList == NULL
-    if (((destinationCount == NULL || *destinationCount == 0) && destinationPropertyList != NULL) || (destinationCount != NULL && *destinationCount != 0 && destinationPropertyList == NULL)) {
+    // 1. *destinationCountPointer == 0 && *destinationPropertyListPointer != NULL
+    // 2. *destinationCountPointer != 0 && *destinationPropertyListPointer == NULL
+    if ((*destinationCountPointer == 0 && *destinationPropertyListPointer != NULL) || (*destinationCountPointer != 0 && *destinationPropertyListPointer == NULL)) {
         return;
     }
     
@@ -57,22 +60,13 @@ void fetchAllSettableProperty(Class cls, objc_property_t *destinationPropertyLis
             // 目前只支持对象
             continue;
         }
-        
-        if (!destinationCount) {
-            destinationCount = malloc(sizeof(unsigned int));
-            *destinationCount = 0;
-        }
         // 将 objc_property_t 复制到目标数组
-        // 如果 destinationPropertyList 没有分配内存
-        if (!destinationPropertyList) {
-            // 这里的 malloc 需要在外面释放，会导致 clang static analyzer 在函数返回的时候报告
-            // Potential leak of memory pointed to by 'destinationPropertyList'
-            destinationPropertyList = malloc(sizeof(objc_property_t));
-        } else {
-            destinationPropertyList = realloc(destinationPropertyList, sizeof(objc_property_t) * (*destinationCount + 1));
+        *destinationPropertyListPointer = reallocf(*destinationPropertyListPointer, sizeof(objc_property_t) * (*destinationCountPointer + 1));
+        if (destinationPropertyListPointer) {
+            // 由于 [] 比 * 优先级更高，因此需要使用括号
+            (*destinationPropertyListPointer)[*destinationCountPointer] = propertyList[i];
+            ++*destinationCountPointer;
         }
-        destinationPropertyList[*destinationCount] = propertyList[i];
-        ++*destinationCount;
     }
     // free 可以释放 NULL
     free(propertyList);
@@ -90,7 +84,7 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
         // 递归查找
         Class cls = objectClass;
         for (; cls; cls = class_getSuperclass(cls)) {
-            fetchAllSettableProperty(cls, totalPropertyList, &totalCount);
+            fetchAllSettableProperty(cls, &totalPropertyList, &totalCount);
             
             BOOL isContainProtocol = NO;
             unsigned int protocolCount = 0;
@@ -108,7 +102,7 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
             }
         }
     } else {
-        fetchAllSettableProperty(objectClass, totalPropertyList, &totalCount);
+        fetchAllSettableProperty(objectClass, &totalPropertyList, &totalCount);
     }
     
     __block id modelObject = nil;

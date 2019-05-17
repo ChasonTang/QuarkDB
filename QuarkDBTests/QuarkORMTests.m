@@ -7,8 +7,6 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "QuarkORM.h"
-#import "A.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -41,12 +39,5 @@ NS_ASSUME_NONNULL_END
     }];
 }
  */
-
-- (void)testConvertDictionaryToObject {
-    A *a = convertDictionaryToObject(@{
-                                @"a": @[@"a"],
-                                @"b": @1
-                                }, A.class);
-}
 
 @end

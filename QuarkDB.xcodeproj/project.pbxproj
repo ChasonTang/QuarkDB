@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		18D113B422606DFB00E0C3BC /* A.m in Sources */ = {isa = PBXBuildFile; fileRef = 18D113B322606DFB00E0C3BC /* A.m */; };
 		18D113B92260704500E0C3BC /* QuarkORMTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 18D113B82260704500E0C3BC /* QuarkORMTests.m */; };
 		18E9930D225DEEA000DF5F48 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E9930C225DEEA000DF5F48 /* AppDelegate.m */; };
 		18E99310225DEEA000DF5F48 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E9930F225DEEA000DF5F48 /* ViewController.m */; };
@@ -29,8 +28,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		18D113B222606DFB00E0C3BC /* A.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = A.h; sourceTree = "<group>"; };
-		18D113B322606DFB00E0C3BC /* A.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = A.m; sourceTree = "<group>"; };
 		18D113B82260704500E0C3BC /* QuarkORMTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QuarkORMTests.m; sourceTree = "<group>"; };
 		18E99308225DEEA000DF5F48 /* QuarkDB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QuarkDB.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		18E9930B225DEEA000DF5F48 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -106,8 +103,6 @@
 			children = (
 				18D113B82260704500E0C3BC /* QuarkORMTests.m */,
 				18E99326225DEEA100DF5F48 /* Info.plist */,
-				18D113B222606DFB00E0C3BC /* A.h */,
-				18D113B322606DFB00E0C3BC /* A.m */,
 			);
 			path = QuarkDBTests;
 			sourceTree = "<group>";
@@ -232,7 +227,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				18D113B422606DFB00E0C3BC /* A.m in Sources */,
 				18D113B92260704500E0C3BC /* QuarkORMTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
