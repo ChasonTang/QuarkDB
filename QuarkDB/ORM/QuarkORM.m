@@ -113,7 +113,7 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
         // NSJSONReadingMutableContainers 导致变为 mutable JSON Array/Dictionary
         // NSJSONReadingMutableLeaves 导致叶子结点变为 NSMutableString
         // 这里隐含支持的 JSON 类型有 NSMutableString NSNull NSMutableDictionary NSMutableArray NSDecimalNumber
-        if (![obj isKindOfClass:NSString.class] || ![obj isKindOfClass:NSNumber.class] || ![obj isKindOfClass:NSArray.class] || ![obj isKindOfClass:NSDictionary.class]) {
+        if (![obj isKindOfClass:NSString.class] && ![obj isKindOfClass:NSNumber.class] && ![obj isKindOfClass:NSArray.class] && ![obj isKindOfClass:NSDictionary.class]) {
             return;
         }
         for (unsigned int i = 0; i < totalCount; ++i) {
@@ -223,16 +223,12 @@ NSArray *convertArrayToObject(NSArray *array, Class arrayItemClass) {
     if (array.count == 0) {
         return nil;
     }
-    // 这里只能支持 NSString NSNumber NSDictionary 转换，不支持 NSArray 嵌套转换，因为丢失了类型信息
-    if (arrayItemClass != NSString.class && arrayItemClass != NSNumber.class && arrayItemClass != NSDictionary.class) {
-        return nil;
-    }
     __block NSMutableArray *resultMutableArray = nil;
     [array enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         id item = nil;
         if ((arrayItemClass == NSString.class && [obj isKindOfClass:NSString.class]) || (arrayItemClass == NSNumber.class && [obj isKindOfClass:NSNumber.class])) {
             item = obj;
-        } else if (arrayItemClass == NSDictionary.class && [obj isKindOfClass:NSDictionary.class]) {
+        } else if ([obj isKindOfClass:NSDictionary.class]) {
             item = convertDictionaryToObject(obj, arrayItemClass);
         }
         if (item) {
