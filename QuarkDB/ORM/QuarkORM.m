@@ -65,6 +65,8 @@ void fetchAllSettableProperty(Class cls, objc_property_t *destinationPropertyLis
         // 将 objc_property_t 复制到目标数组
         // 如果 destinationPropertyList 没有分配内存
         if (!destinationPropertyList) {
+            // 这里的 malloc 需要在外面释放，会导致 clang static analyzer 在函数返回的时候报告
+            // Potential leak of memory pointed to by 'destinationPropertyList'
             destinationPropertyList = malloc(sizeof(objc_property_t));
         } else {
             destinationPropertyList = realloc(destinationPropertyList, sizeof(objc_property_t) * (*destinationCount + 1));
@@ -88,7 +90,6 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
         // 递归查找
         Class cls = objectClass;
         for (; cls; cls = class_getSuperclass(cls)) {
-            fetchAllSettableProperty(<#__unsafe_unretained Class  _Nonnull cls#>, <#objc_property_t * _Nullable destinationPropertyList#>, <#unsigned int * _Nullable destinationCount#>)
             fetchAllSettableProperty(cls, totalPropertyList, &totalCount);
             
             BOOL isContainProtocol = NO;
