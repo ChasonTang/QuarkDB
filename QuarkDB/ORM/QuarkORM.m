@@ -166,7 +166,29 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
                     convertedObject = obj;
                 } else if (propertyClass == NSArray.class && protocolClass && [obj isKindOfClass:NSArray.class]) {
                     // 属于数组并且带有类型，则循环转换
-                    convertedObject = convertArrayToObject(obj, protocolClass);
+                    NSArray *arrayObj = obj;
+                    if (arrayObj.count == 0) {
+                        convertedObject = nil;
+                    } else {
+                        __block NSMutableArray *resultMutableArray = nil;
+                        [arrayObj enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                            id item = nil;
+                            if ((protocolClass == NSString.class && [obj isKindOfClass:NSString.class]) || (protocolClass == NSNumber.class && [obj isKindOfClass:NSNumber.class])) {
+                                item = obj;
+                            } else if ([obj isKindOfClass:NSDictionary.class]) {
+                                item = convertDictionaryToObject(obj, protocolClass);
+                            }
+                            if (item) {
+                                if (!resultMutableArray) {
+                                    resultMutableArray = [NSMutableArray arrayWithCapacity:arrayObj.count];
+                                }
+                                // 添加对象
+                                [resultMutableArray addObject:item];
+                            }
+                        }];
+                        // iOS 11 之前可能存在性能问题
+                        convertedObject = resultMutableArray.copy;
+                    }
                 } else if ([obj isKindOfClass:NSDictionary.class]){
                     // 对象类型，转换
                     convertedObject = convertDictionaryToObject(obj, propertyClass);
@@ -219,27 +241,6 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
     return modelObject;
 }
 
-NSArray *convertArrayToObject(NSArray *array, Class arrayItemClass) {
-    if (array.count == 0) {
-        return nil;
-    }
-    __block NSMutableArray *resultMutableArray = nil;
-    [array enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        id item = nil;
-        if ((arrayItemClass == NSString.class && [obj isKindOfClass:NSString.class]) || (arrayItemClass == NSNumber.class && [obj isKindOfClass:NSNumber.class])) {
-            item = obj;
-        } else if ([obj isKindOfClass:NSDictionary.class]) {
-            item = convertDictionaryToObject(obj, arrayItemClass);
-        }
-        if (item) {
-            if (!resultMutableArray) {
-                resultMutableArray = [NSMutableArray arrayWithCapacity:array.count];
-            }
-            // 添加对象
-            [resultMutableArray addObject:item];
-        }
-    }];
-    
-    // iOS 11 之前可能存在性能问题
-    return resultMutableArray.copy;
+id convertObjectToDictionaryOrArray(id model) {
+    Class class
 }

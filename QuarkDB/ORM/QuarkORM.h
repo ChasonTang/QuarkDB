@@ -16,6 +16,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 id _Nullable convertDictionaryToObject(NSDictionary *dictionary, Class objectClass);
 
-NSArray *_Nullable convertArrayToObject(NSArray *array, Class arrayItemClass);
+id _Nullable convertObjectToDictionaryOrArray(id model);
 
 NS_ASSUME_NONNULL_END
