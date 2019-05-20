@@ -35,7 +35,7 @@ void fetchAllGettableOrSettableProperty(Class cls, objc_property_t **destination
             free(value);
             continue;
         }
-        
+        free(value);
         char *attributeValueCString = property_copyAttributeValue(propertyList[i], "C");
         if (!attributeValueCString) {
             // 目前要求 copy
@@ -65,6 +65,8 @@ void fetchAllGettableOrSettableProperty(Class cls, objc_property_t **destination
             // 由于 [] 比 * 优先级更高，因此需要使用括号
             (*destinationPropertyListPointer)[*destinationCountPointer] = propertyList[i];
             ++*destinationCountPointer;
+        } else {
+            *destinationCountPointer = 0;
         }
     }
     // free 可以释放 NULL
@@ -257,8 +259,7 @@ NSDictionary *convertObjectToDictionary(id model) {
     if (totalCount == 0 || totalPropertyList == NULL) {
         return nil;
     }
-    for (unsigned int i = 0; i < totalCount; ++i) {
-//    for (unsigned int i = totalCount - 1; i >= 0; --i) {
+    for (unsigned int i = totalCount - 1; i >= 0; --i) {
         NSString *propertyName = [NSString stringWithUTF8String:property_getName(totalPropertyList[i])];
         // 没有 propertyName 则直接下一个属性
         if (!propertyName) {
