@@ -12,14 +12,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-void fetchAllSettableProperty(Class cls, objc_property_t *_Nullable *destinationPropertyList, unsigned int *destinationCount);
+static void fetchAllGettableOrSettableProperty(Class cls, objc_property_t *_Nullable *destinationPropertyList, unsigned int *destinationCount, BOOL isGettableProperty);
+
+static void extractProperty(Class objectClass, unsigned int *totalCount, objc_property_t *_Nullable *totalPropertyList, BOOL isGettableProperty);
 
 NS_ASSUME_NONNULL_END
 
-void fetchAllSettableProperty(Class cls, objc_property_t **destinationPropertyListPointer, unsigned int *destinationCountPointer) {
-    if (destinationPropertyListPointer == NULL || destinationCountPointer == NULL) {
-        return;
-    }
+void fetchAllGettableOrSettableProperty(Class cls, objc_property_t **destinationPropertyListPointer, unsigned int *destinationCountPointer, BOOL isGettableProperty) {
     // 防御 destinationCount 和 destinationPropertyList 不匹配的情况
     // 1. *destinationCountPointer == 0 && *destinationPropertyListPointer != NULL
     // 2. *destinationCountPointer != 0 && *destinationPropertyListPointer == NULL
@@ -31,8 +30,8 @@ void fetchAllSettableProperty(Class cls, objc_property_t **destinationPropertyLi
     objc_property_t *propertyList = class_copyPropertyList(cls, &count);
     for (unsigned int i = 0; i < count; ++i) {
         char *value = property_copyAttributeValue(propertyList[i], "R");
-        if (value) {
-            // 只读 property 忽略
+        if (value && !isGettableProperty) {
+            // 获取 setter 的时候，只读 property 忽略
             free(value);
             continue;
         }
@@ -62,7 +61,7 @@ void fetchAllSettableProperty(Class cls, objc_property_t **destinationPropertyLi
         }
         // 将 objc_property_t 复制到目标数组
         *destinationPropertyListPointer = reallocf(*destinationPropertyListPointer, sizeof(objc_property_t) * (*destinationCountPointer + 1));
-        if (destinationPropertyListPointer) {
+        if (*destinationPropertyListPointer) {
             // 由于 [] 比 * 优先级更高，因此需要使用括号
             (*destinationPropertyListPointer)[*destinationCountPointer] = propertyList[i];
             ++*destinationCountPointer;
@@ -72,19 +71,12 @@ void fetchAllSettableProperty(Class cls, objc_property_t **destinationPropertyLi
     free(propertyList);
 }
 
-id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class objectClass) {
-    if (dictionary.count == 0) {
-        return nil;
-    }
-    
-    unsigned int totalCount = 0;
-    objc_property_t *totalPropertyList = NULL;
-    
+void extractProperty(Class objectClass, unsigned int *totalCount, objc_property_t *_Nullable *totalPropertyList, BOOL isGettableProperty) {
     if ([objectClass conformsToProtocol:@protocol(QuarkORMModel)]) {
         // 递归查找
         Class cls = objectClass;
         for (; cls; cls = class_getSuperclass(cls)) {
-            fetchAllSettableProperty(cls, &totalPropertyList, &totalCount);
+            fetchAllGettableOrSettableProperty(cls, totalPropertyList, totalCount, isGettableProperty);
             
             BOOL isContainProtocol = NO;
             unsigned int protocolCount = 0;
@@ -102,8 +94,19 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
             }
         }
     } else {
-        fetchAllSettableProperty(objectClass, &totalPropertyList, &totalCount);
+        fetchAllGettableOrSettableProperty(objectClass, totalPropertyList, totalCount, isGettableProperty);
     }
+}
+
+id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class objectClass) {
+    if (dictionary.count == 0) {
+        return nil;
+    }
+    
+    unsigned int totalCount = 0;
+    objc_property_t *totalPropertyList = NULL;
+    
+    extractProperty(objectClass, &totalCount, &totalPropertyList, NO);
     
     __block id modelObject = nil;
     
@@ -164,8 +167,8 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
                 if ((propertyClass == NSString.class && [obj isKindOfClass:NSString.class]) || (propertyClass == NSNumber.class && [obj isKindOfClass:NSNumber.class])) {
                     // 直接赋值 NSString/NSNumber
                     convertedObject = obj;
-                } else if (propertyClass == NSArray.class && protocolClass && [obj isKindOfClass:NSArray.class]) {
-                    // 属于数组并且带有类型，则循环转换
+                } else if (propertyClass == NSArray.class && [obj isKindOfClass:NSArray.class]) {
+                    // 属于数组，则循环转换
                     NSArray *arrayObj = obj;
                     if (arrayObj.count == 0) {
                         convertedObject = nil;
@@ -173,11 +176,14 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
                         __block NSMutableArray *resultMutableArray = nil;
                         [arrayObj enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                             id item = nil;
-                            if ((protocolClass == NSString.class && [obj isKindOfClass:NSString.class]) || (protocolClass == NSNumber.class && [obj isKindOfClass:NSNumber.class])) {
+                            // 数组带类型，则要求类型匹配，或者字典转模型
+                            // 没有类型则只支持 NSArray NSNumber
+                            if ((protocolClass && protocolClass == NSString.class && [obj isKindOfClass:NSString.class]) || (protocolClass && protocolClass == NSNumber.class && [obj isKindOfClass:NSNumber.class]) || ([obj isKindOfClass:NSString.class] || [obj isKindOfClass:NSNumber.class])) {
                                 item = obj;
-                            } else if ([obj isKindOfClass:NSDictionary.class]) {
+                            } else if (protocolClass && [obj isKindOfClass:NSDictionary.class]) {
                                 item = convertDictionaryToObject(obj, protocolClass);
                             }
+
                             if (item) {
                                 if (!resultMutableArray) {
                                     resultMutableArray = [NSMutableArray arrayWithCapacity:arrayObj.count];
@@ -241,6 +247,114 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
     return modelObject;
 }
 
-id convertObjectToDictionaryOrArray(id model) {
-    Class class
+NSDictionary *convertObjectToDictionary(id model) {
+    unsigned int totalCount = 0;
+    objc_property_t *totalPropertyList = NULL;
+    
+    extractProperty([model class], &totalCount, &totalPropertyList, YES);
+    
+    __block NSMutableDictionary *jsonDictionary = nil;
+    if (totalCount == 0 || totalPropertyList == NULL) {
+        return nil;
+    }
+    for (unsigned int i = 0; i < totalCount; ++i) {
+//    for (unsigned int i = totalCount - 1; i >= 0; --i) {
+        NSString *propertyName = [NSString stringWithUTF8String:property_getName(totalPropertyList[i])];
+        // 没有 propertyName 则直接下一个属性
+        if (!propertyName) {
+            continue;
+        }
+        char *attributeValueCString = property_copyAttributeValue(totalPropertyList[i], "T");
+        if (!attributeValueCString) {
+            continue;
+        }
+        NSString *attributeValueString = [NSString stringWithUTF8String:attributeValueCString];
+        if (!attributeValueString) {
+            free(attributeValueCString);
+            continue;
+        }
+        free(attributeValueCString);
+        // 扫描类型
+        NSScanner *scanner = [NSScanner scannerWithString:attributeValueString];
+        if (![scanner scanString:@"@\"" intoString:nil]) {
+            // 目前只支持对象
+            continue;
+        }
+        NSString *propertyType = nil;
+        [scanner scanUpToCharactersFromSet:[NSCharacterSet characterSetWithCharactersInString:@"\"<"]
+                                intoString:&propertyType];
+        if (!propertyType) {
+            // propertyType 为空，正常情况不应该存在
+            continue;
+        }
+        Class propertyClass = NSClassFromString(propertyType);
+        if (!propertyClass) {
+            // 正常流程不应该存在 propertyClass == nil 的情况
+            continue;
+        }
+        
+        // 获取 getter
+        NSString *getterMethodString = nil;
+        attributeValueCString = property_copyAttributeValue(totalPropertyList[i], "G");
+        if (attributeValueCString) {
+            // 自定义 getter
+            getterMethodString = [NSString stringWithUTF8String:attributeValueCString];
+        } else {
+            // 默认 getter
+            getterMethodString = propertyName;
+        }
+        free(attributeValueCString);
+        if (getterMethodString.length == 0) {
+            // 正常情况不应该走到这里，属于对 stringWithUTF8String 返回 nil 的兜底处理
+            continue;
+        }
+        // 调用 getter 赋值
+        SEL getterSelector = NSSelectorFromString(getterMethodString);
+        if (![[model class] instancesRespondToSelector:getterSelector]) {
+            // 没有对应的 setter 响应则忽略，但是一般情况下不会进这个逻辑，因为 readwrite property 肯定有 setter
+            continue;
+        }
+        id propertyObject = ((id (*)(id, SEL, id)) objc_msgSend)(model, getterSelector, nil);
+        // 设置字典
+        if (!propertyObject) {
+            // nil 则继续
+            continue;
+        }
+        if (!jsonDictionary) {
+            jsonDictionary = [NSMutableDictionary dictionaryWithCapacity:totalCount];
+        }
+        if (propertyClass == NSString.class || propertyClass == NSNumber.class) {
+            // 直接设置
+            jsonDictionary[propertyName] = propertyObject;
+        } else if (propertyClass == NSArray.class) {
+            jsonDictionary[propertyName] = convertArrayToArray(propertyObject);
+        } else {
+            // 递归设置
+            jsonDictionary[propertyName] = convertObjectToDictionary(propertyObject);
+        }
+    }
+    
+    free(totalPropertyList);
+    
+    return jsonDictionary.copy;
+}
+
+NSArray *_Nullable convertArrayToArray(NSArray *array) {
+    __block NSMutableArray *resultArray = nil;
+    [array enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        id item = nil;
+        if ([obj isKindOfClass:NSNumber.class] || [obj isKindOfClass:NSString.class]) {
+            item = obj;
+        } else if ([obj isKindOfClass:NSArray.class]) {
+            item = convertArrayToArray(obj);
+        } else {
+            item = convertObjectToDictionary(obj);
+        }
+        if (!resultArray) {
+            resultArray = [NSMutableArray arrayWithCapacity:array.count];
+        }
+        [resultArray addObject:item];
+    }];
+    
+    return resultArray.copy;
 }
