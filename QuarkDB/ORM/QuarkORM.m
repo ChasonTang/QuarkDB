@@ -260,6 +260,10 @@ NSDictionary *convertObjectToDictionary(id model) {
         return nil;
     }
     for (unsigned int i = totalCount - 1; i >= 0; --i) {
+        if (!totalPropertyList[i]) {
+            // TODO: 代码防御，static analyzer 提示错误
+            continue;
+        }
         NSString *propertyName = [NSString stringWithUTF8String:property_getName(totalPropertyList[i])];
         // 没有 propertyName 则直接下一个属性
         if (!propertyName) {
