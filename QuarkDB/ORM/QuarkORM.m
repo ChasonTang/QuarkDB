@@ -118,7 +118,7 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
         // NSNull 也是会被转换的，但是转模型不需要转这个类型
         // NSJSONReadingMutableContainers 导致变为 mutable JSON Array/Dictionary
         // NSJSONReadingMutableLeaves 导致叶子结点变为 NSMutableString
-        // 这里隐含支持的 JSON 类型有 NSMutableString NSNull NSMutableDictionary NSMutableArray NSDecimalNumber
+        // 这里隐含支持的 JSON 类型有 NSMutableString NSMutableDictionary NSMutableArray NSDecimalNumber
         if (![obj isKindOfClass:NSString.class] && ![obj isKindOfClass:NSNumber.class] && ![obj isKindOfClass:NSArray.class] && ![obj isKindOfClass:NSDictionary.class]) {
             return;
         }
@@ -167,7 +167,7 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
                     protocolClass = NSClassFromString(protocolName);
                 }
                 id convertedObject = nil;
-                if ((propertyClass == NSString.class && [obj isKindOfClass:NSString.class]) || (propertyClass == NSNumber.class && [obj isKindOfClass:NSNumber.class])) {
+                if (([obj isKindOfClass:NSDecimalNumber.class] && propertyClass == NSDecimalNumber.class) || (propertyClass == NSNumber.class && [obj isKindOfClass:NSNumber.class]) || (propertyClass == NSString.class && [obj isKindOfClass:NSString.class])) {
                     // 直接赋值 NSString/NSNumber
                     convertedObject = obj;
                 } else if (propertyClass == NSArray.class && [obj isKindOfClass:NSArray.class]) {
@@ -180,13 +180,13 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
                         [arrayObj enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                             id item = nil;
                             // 数组带类型，则要求类型匹配，或者字典转模型
-                            // 没有类型则只支持 NSArray NSNumber
-                            if ((protocolClass && protocolClass == NSString.class && [obj isKindOfClass:NSString.class]) || (protocolClass && protocolClass == NSNumber.class && [obj isKindOfClass:NSNumber.class]) || ([obj isKindOfClass:NSString.class] || [obj isKindOfClass:NSNumber.class])) {
+                            // 没有类型则只支持 NSArray NSNumber NSDecimalNumber，等价于 NSArray<NSNumber, NSString, NSDecimalNumber> * 声明了三个协议
+                            if ((protocolClass == NSDecimalNumber.class && [obj isKindOfClass:NSDecimalNumber.class]) || (protocolClass == NSString.class && [obj isKindOfClass:NSString.class]) || (protocolClass == NSNumber.class && [obj isKindOfClass:NSNumber.class]) || [obj isKindOfClass:NSString.class] || [obj isKindOfClass:NSNumber.class]) {
                                 item = obj;
                             } else if (protocolClass && [obj isKindOfClass:NSDictionary.class]) {
                                 item = convertDictionaryToObject(obj, protocolClass);
                             }
-
+                            
                             if (item) {
                                 if (!resultMutableArray) {
                                     resultMutableArray = [NSMutableArray arrayWithCapacity:arrayObj.count];
@@ -256,10 +256,11 @@ NSDictionary *convertObjectToDictionary(id model) {
     
     extractProperty([model class], &totalCount, &totalPropertyList, YES);
     
-    __block NSMutableDictionary *jsonDictionary = nil;
+    NSMutableDictionary *jsonDictionary = nil;
     if (totalCount == 0 || totalPropertyList == NULL) {
         return nil;
     }
+    // 这里使用 int i 是为了防止 unsigned int 溢出
     for (int i = totalCount - 1; i >= 0; --i) {
         NSString *propertyName = [NSString stringWithUTF8String:property_getName(totalPropertyList[i])];
         // 没有 propertyName 则直接下一个属性
@@ -316,23 +317,28 @@ NSDictionary *convertObjectToDictionary(id model) {
             // 没有对应的 setter 响应则忽略，但是一般情况下不会进这个逻辑，因为 readwrite property 肯定有 setter
             continue;
         }
-        id propertyObject = ((id (*)(id, SEL, id)) objc_msgSend)(model, getterSelector, nil);
+        id propertyObject = ((id (*)(id, SEL)) objc_msgSend)(model, getterSelector);
         // 设置字典
         if (!propertyObject) {
             // nil 则继续
             continue;
         }
-        if (!jsonDictionary) {
-            jsonDictionary = [NSMutableDictionary dictionaryWithCapacity:totalCount];
-        }
-        if (propertyClass == NSString.class || propertyClass == NSNumber.class) {
+        id item = nil;
+        if (propertyClass == NSString.class || propertyClass == NSNumber.class || propertyClass == NSDecimalNumber.class) {
             // 直接设置
-            jsonDictionary[propertyName] = propertyObject;
+            item = propertyObject;
         } else if (propertyClass == NSArray.class) {
-            jsonDictionary[propertyName] = convertArrayToArray(propertyObject);
+            item = convertArrayToArray(propertyObject);
         } else {
             // 递归设置
-            jsonDictionary[propertyName] = convertObjectToDictionary(propertyObject);
+            item = convertObjectToDictionary(propertyObject);
+        }
+        
+        if (item) {
+            if (!jsonDictionary) {
+                jsonDictionary = [NSMutableDictionary dictionaryWithCapacity:totalCount];
+            }
+            jsonDictionary[propertyName] = item;
         }
     }
     
@@ -352,10 +358,12 @@ NSArray *_Nullable convertArrayToArray(NSArray *array) {
         } else {
             item = convertObjectToDictionary(obj);
         }
-        if (!resultArray) {
-            resultArray = [NSMutableArray arrayWithCapacity:array.count];
+        if (item) {
+            if (!resultArray) {
+                resultArray = [NSMutableArray arrayWithCapacity:array.count];
+            }
+            [resultArray addObject:item];
         }
-        [resultArray addObject:item];
     }];
     
     return resultArray.copy;
