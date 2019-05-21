@@ -35,6 +35,7 @@ void fetchAllGettableOrSettableProperty(Class cls, objc_property_t **destination
             free(value);
             continue;
         }
+        // 如果获取 getter 时，此属性为 readonly，会导致 value 有内存分配，因此需要 free
         free(value);
         char *attributeValueCString = property_copyAttributeValue(propertyList[i], "C");
         if (!attributeValueCString) {
