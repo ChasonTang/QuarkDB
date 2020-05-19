@@ -1,9 +1,9 @@
 //
 //  ViewController.m
-//  QuarkDB
+//  Example
 //
-//  Created by ChasonTang on 2019/4/10.
-//  Copyright © 2019 Warmbloom. All rights reserved.
+//  Created by 唐佳诚 on 2020/5/19.
+//  Copyright © 2020 Warmbloom. All rights reserved.
 //
 
 #import "ViewController.h"
@@ -18,5 +18,6 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
 }
+
 
 @end

@@ -1,0 +1,16 @@
+PODS:
+  - QuarkORM (0.1.0)
+
+DEPENDENCIES:
+  - QuarkORM (from `.`)
+
+EXTERNAL SOURCES:
+  QuarkORM:
+    :path: "."
+
+SPEC CHECKSUMS:
+  QuarkORM: 716e8096121cd33757c5abaa488f5b0e6733ee19
+
+PODFILE CHECKSUM: d2ccae80bcc12be8f20469da04507673de9a00ea
+
+COCOAPODS: 1.9.1

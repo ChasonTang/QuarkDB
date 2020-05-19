@@ -16,7 +16,32 @@ static void fetchAllGettableOrSettableProperty(Class cls, objc_property_t *_Null
 
 static void extractProperty(Class objectClass, unsigned int *totalCount, objc_property_t *_Nullable *totalPropertyList, BOOL isGettableProperty);
 
+static NSString *_Nullable convert_underline_to_camel_case(NSString *underlineString);
+
 NS_ASSUME_NONNULL_END
+
+NSString *convert_underline_to_camel_case(NSString *underlineString) {
+    NSArray<NSString *> *componentArray = [underlineString componentsSeparatedByString:@"_"];
+    if (componentArray.count > 0) {
+        NSMutableArray<NSString *> *resultComponentArray = [NSMutableArray arrayWithCapacity:componentArray.count];
+        [componentArray enumerateObjectsUsingBlock:^(NSString *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
+            if (idx != 0 && obj.length > 0) {
+                NSString *firstWord = [obj substringToIndex:1].uppercaseString;
+                NSString *otherWord = nil;
+                if (obj.length > 1) {
+                    otherWord = [obj substringFromIndex:1];
+                }
+                [resultComponentArray addObject:[NSString stringWithFormat:@"%@%@", firstWord, otherWord ?: @""]];
+            } else {
+                [resultComponentArray addObject:obj];
+            }
+        }];
+
+        return [resultComponentArray componentsJoinedByString:@""];
+    } else {
+        return nil;
+    }
+}
 
 void fetchAllGettableOrSettableProperty(Class cls, objc_property_t **destinationPropertyListPointer, unsigned int *destinationCountPointer, BOOL isGettableProperty) {
     // 防御 destinationCount 和 destinationPropertyList 不匹配的情况
@@ -101,7 +126,7 @@ void extractProperty(Class objectClass, unsigned int *totalCount, objc_property_
     }
 }
 
-id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class objectClass) {
+id qk_convert_dictionary_to_object(NSDictionary<NSString *, id> *dictionary, Class objectClass, BOOL needUnderlineToCamelCase) {
     if (dictionary.count == 0) {
         return nil;
     }
@@ -114,6 +139,13 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
     __block id modelObject = nil;
     
     [dictionary enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        NSString *newKey = key;
+        if (needUnderlineToCamelCase) {
+            newKey = convert_underline_to_camel_case(key);
+        }
+        if (newKey.length > 0) {
+            key = newKey;
+        }
         // NSJSONSerialization 在数字比较大的时候会使用 NSDecimalNumber
         // NSNull 也是会被转换的，但是转模型不需要转这个类型
         // NSJSONReadingMutableContainers 导致变为 mutable JSON Array/Dictionary
@@ -184,7 +216,7 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
                             if ((protocolClass == NSDecimalNumber.class && [obj isKindOfClass:NSDecimalNumber.class]) || (protocolClass == NSString.class && [obj isKindOfClass:NSString.class]) || (protocolClass == NSNumber.class && [obj isKindOfClass:NSNumber.class]) || [obj isKindOfClass:NSString.class] || [obj isKindOfClass:NSNumber.class]) {
                                 item = obj;
                             } else if (protocolClass && [obj isKindOfClass:NSDictionary.class]) {
-                                item = convertDictionaryToObject(obj, protocolClass);
+                                item = qk_convert_dictionary_to_object(obj, protocolClass, needUnderlineToCamelCase);
                             }
                             
                             if (item) {
@@ -200,7 +232,7 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
                     }
                 } else if ([obj isKindOfClass:NSDictionary.class]){
                     // 对象类型，转换
-                    convertedObject = convertDictionaryToObject(obj, propertyClass);
+                    convertedObject = qk_convert_dictionary_to_object(obj, propertyClass, needUnderlineToCamelCase);
                 }
                 if (!convertedObject) {
                     // 如果没有可转换的对象，则跳过
@@ -250,7 +282,7 @@ id convertDictionaryToObject(NSDictionary<NSString *, id> *dictionary, Class obj
     return modelObject;
 }
 
-NSDictionary *convertObjectToDictionary(id model) {
+NSDictionary *qk_convert_object_to_dictionary(id model) {
     unsigned int totalCount = 0;
     objc_property_t *totalPropertyList = NULL;
     
@@ -328,10 +360,10 @@ NSDictionary *convertObjectToDictionary(id model) {
             // 直接设置
             item = propertyObject;
         } else if (propertyClass == NSArray.class) {
-            item = convertArrayToArray(propertyObject);
+            item = qk_convert_object_array_to_array(propertyObject);
         } else {
             // 递归设置
-            item = convertObjectToDictionary(propertyObject);
+            item = qk_convert_object_to_dictionary(propertyObject);
         }
         
         if (item) {
@@ -347,16 +379,16 @@ NSDictionary *convertObjectToDictionary(id model) {
     return jsonDictionary.copy;
 }
 
-NSArray *_Nullable convertArrayToArray(NSArray *array) {
+NSArray *_Nullable qk_convert_object_array_to_array(NSArray *array) {
     __block NSMutableArray *resultArray = nil;
     [array enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         id item = nil;
         if ([obj isKindOfClass:NSNumber.class] || [obj isKindOfClass:NSString.class]) {
             item = obj;
         } else if ([obj isKindOfClass:NSArray.class]) {
-            item = convertArrayToArray(obj);
+            item = qk_convert_object_array_to_array(obj);
         } else {
-            item = convertObjectToDictionary(obj);
+            item = qk_convert_object_to_dictionary(obj);
         }
         if (item) {
             if (!resultArray) {
